@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <button id="btn">play</button>
+  </body>
+  <script type="module">
+    import { SplendidGrandPiano } from "https://unpkg.com/smplr/dist/index.mjs"; // needs to be a url
+    const audio = new AudioContext(); // create the audio context
+    const piano = new SplendidGrandPiano(audio); // create and load the instrument
+    const chords = [
+      {
+        name: "",
+        notes: [0, 4, 7],
+        spokenName: "Major"
+      },
+      {
+        name: "+",
+        notes: [0, 4, 8],
+        spokenName: "Augmented"
+      },
+      {
+        name: "m",
+        notes: [0, 3, 7],
+        spokenName: "Minor"
+      },
+      {
+        name: "dim",
+        notes: [0, 3, 6],
+        spokenName: "Diminished"
+      },
+      {
+        name: "7",
+        notes: [0, 4, 7, 10],
+        spokenName: "Dominant 7th"
+      },
+      {
+        name: "m7",
+        notes: [0, 3, 7, 10],
+        spokenName: "Minor 7th"
+      },
+           {
+        name: "M7",
+        notes: [0, 4, 7, 11],
+        spokenName: "Major 7th"
+      },
+      {
+        name: "mM7",
+        notes: [0, 3, 7, 11],
+        spokenName: "Minor major 7th"
+      },
+    ];
+
+
+    async function speak(message) {
+      return new Promise(r => {
+        var utter = new SpeechSynthesisUtterance(message);
+        window.speechSynthesis.speak(utter);
+        utter.onend = r;
+      });
+    }
+
+    async function sleep(duration) {
+      return new Promise(r => setTimeout(r, duration))
+    }
+
+    async function singleQuiz(piano, key, notes, spokenName) {
+      let noteDuration = 5
+      for (const note of notes) {
+        piano.start({ note: key + note, duration: noteDuration });
+      }
+      await sleep(noteDuration*1000);
+      await speak(spokenName)
+    }
+    
+    // returns a random integer in [floor, ceiling]
+    function randomInt(floor, ceiling) {
+      if (ceiling < floor) return nan;
+      return floor + Math.floor(Math.random() * (ceiling - floor + 1))
+    }
+
+    function noteName(note) {
+      const noteNames = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+      const index = note % 12;
+      return noteNames[index];
+    }
+    
+    document.getElementById("btn").onclick = async () => {
+      audio.resume(); // enable audio context after a user interaction
+      // Request screen wake lock.  TODO: Apparently:
+      //  - this will only work with https
+      //  - we will need to detect visibility changes and re-request the screen lock.
+      try {
+        const wakeLock = await navigator.wakeLock.request("screen");
+      } catch (err) {
+        console.log(`${err.name}, ${err.message}`);
+      }
+
+      while (true) {
+        // 21 is A0, lowest note on the piano.  108 is C8, highest note on the piano.
+        // Since we're playing chords and may do inversions, let's give a buffer of 24 on
+        // each side.  So generate an int in the range 45-84. aka, the range 0-39, plus 45.
+        // Math.random gives us a number in [0,1).
+        const key = randomInt(45,84);
+        const chord = chords[randomInt(0, chords.length-1)];
+        let notes = [...chord.notes];
+        const inversion = randomInt(0, notes.length-1);
+        for (let i = 0; i < inversion; ++i) {
+          notes[i] += 12;
+        }
+
+        console.log(`Playing ${noteName(key)}${chord.name}, inversion ${inversion}: ${notes.map(x => x+key).sort().map(noteName)}`);
+        await singleQuiz(piano, key, notes, chord.spokenName);
+        await sleep(1000);
+      }
+    };
+  </script>
+</html>
