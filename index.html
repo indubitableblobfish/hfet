@@ -1,7 +1,26 @@
 <!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gray Button on Click</title>
+    <style>
+        button {
+            padding: 10px 20px;
+            background-color: darkblue;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .gray-button {
+            background-color: #ccc;
+        }
+    </style>
+</head>
 <html>
   <body>
-    <button id="btn">play</button>
+    <button id="play" onclick="playMusic()">play</button>
+    <button id="pause" onclick="pauseMusic()">pause</button>
   </body>
   <script type="module">
     import { SplendidGrandPiano } from "https://unpkg.com/smplr/dist/index.mjs"; // needs to be a url
@@ -83,8 +102,28 @@
       const index = note % 12;
       return noteNames[index];
     }
+
+    var play = false;
     
-    document.getElementById("btn").onclick = async () => {
+    function pauseMusic() {
+        console.log('Pause button clicked');
+        var pauseButton = document.getElementById("pause");
+        pauseButton.classList.add('gray-button');
+        var playButton = document.getElementById("play");
+        playButton.classList.remove('gray-button');
+        play = false;
+    }
+
+    window.pauseMusic = pauseMusic;
+
+    async function playMusic() {
+      console.log('Play button clicked');
+      
+      var playButton = document.getElementById("play");
+      playButton.classList.add('gray-button');
+      var pauseButton = document.getElementById("pause");
+      pauseButton.classList.remove('gray-button');
+
       audio.resume(); // enable audio context after a user interaction
       // Request screen wake lock.  TODO: Apparently:
       //  - this will only work with https
@@ -95,7 +134,9 @@
         console.log(`${err.name}, ${err.message}`);
       }
 
-      while (true) {
+      play = true; // could be set to false async by the pause button
+
+      while (play) {
         // 21 is A0, lowest note on the piano.  108 is C8, highest note on the piano.
         // Since we're playing chords and may do inversions, let's give a buffer of 24 on
         // each side.  So generate an int in the range 45-84. aka, the range 0-39, plus 45.
@@ -112,6 +153,8 @@
         await singleQuiz(piano, key, notes, chord.spokenName);
         await sleep(1000);
       }
-    };
+    }
+    window.playMusic = playMusic;
+
   </script>
 </html>
