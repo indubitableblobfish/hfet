@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <button id="btn">play</button>
+    <button id="play">play</button>
+    <button id="stop">stop</button>
   </body>
   <script type="module">
     import { SplendidGrandPiano } from "https://unpkg.com/smplr/dist/index.mjs"; // needs to be a url
@@ -63,12 +64,26 @@
       return new Promise(r => setTimeout(r, duration))
     }
 
-    async function singleQuiz(piano, key, notes, spokenName) {
-      let noteDuration = 5
+    async function playArpeggio(piano, key, notes, duration) {
+      const now = audio.currentTime;
+      const increment = duration / notes.length;
+      notes.forEach((note, i) => {
+        piano.start({ note: key + note, time: now + i*increment, duration: increment });
+      });
+      await sleep(duration*1000 + 500);
+    }
+
+    async function playChord(piano, key, notes, duration) {
       for (const note of notes) {
-        piano.start({ note: key + note, duration: noteDuration });
+        piano.start({ note: key + note, duration: duration });
       }
-      await sleep(noteDuration*1000);
+      await sleep(duration*1000);
+    }
+
+    async function singleQuiz(piano, key, notes, spokenName) {
+      await playChord(piano, key, notes, 1);
+      await playArpeggio(piano, key, notes, notes.length * 0.5)
+      await playChord(piano, key, notes, 3);
       await speak(spokenName)
     }
     
@@ -83,8 +98,15 @@
       const index = note % 12;
       return noteNames[index];
     }
+
+    let playing = false;
+
+    document.getElementById("stop").onclick = async () => {
+      playing = false;
+    }
     
-    document.getElementById("btn").onclick = async () => {
+    document.getElementById("play").onclick = async () => {
+      playing = true;
       audio.resume(); // enable audio context after a user interaction
       // Request screen wake lock.  TODO: Apparently:
       //  - this will only work with https
@@ -95,23 +117,26 @@
         console.log(`${err.name}, ${err.message}`);
       }
 
-      while (true) {
-        // 21 is A0, lowest note on the piano.  108 is C8, highest note on the piano.
-        // Since we're playing chords and may do inversions, let's give a buffer of 24 on
-        // each side.  So generate an int in the range 45-84. aka, the range 0-39, plus 45.
-        // Math.random gives us a number in [0,1).
-        const key = randomInt(45,84);
+      while (playing) {
+        // 48 is the C below middle C, 59 is the B below middle C. We'll stay with the 
+	// key note in this octave.
+        const key = randomInt(48,59);
         const chord = chords[randomInt(0, chords.length-1)];
-        let notes = [...chord.notes];
-        const inversion = randomInt(0, notes.length-1);
-        for (let i = 0; i < inversion; ++i) {
-          notes[i] += 12;
-        }
+        const inversion = randomInt(0, chord.notes.length-1);
+        let notes = invertChord(chord.notes, inversion);
 
         console.log(`Playing ${noteName(key)}${chord.name}, inversion ${inversion}: ${notes.map(x => x+key).sort().map(noteName)}`);
         await singleQuiz(piano, key, notes, chord.spokenName);
         await sleep(1000);
       }
     };
+
+    function invertChord(notes, inversion) {
+      let inverted = []
+      for (let i = inversion; i < inversion + notes.length; ++i) {
+	inverted.push(notes[i % notes.length] + 12 * Math.floor(i / notes.length));
+      }
+      return inverted;
+    }
   </script>
 </html>
