@@ -3,6 +3,7 @@
   <body>
     <button id="play">play</button>
     <button id="stop">stop</button>
+    <input type="checkbox" id="inversions">Use inversions</input>
   </body>
   <script type="module">
     import { SplendidGrandPiano } from "https://unpkg.com/smplr/dist/index.mjs"; // needs to be a url
@@ -122,7 +123,8 @@
 	// key note in this octave.
         const key = randomInt(48,59);
         const chord = chords[randomInt(0, chords.length-1)];
-        const inversion = randomInt(0, chord.notes.length-1);
+        const useInversions = document.getElementById("inversions").checked
+        const inversion = useInversions ? randomInt(0, chord.notes.length-1) : 0;
         let notes = invertChord(chord.notes, inversion);
 
         console.log(`Playing ${noteName(key)}${chord.name}, inversion ${inversion}: ${notes.map(x => x+key).sort().map(noteName)}`);
