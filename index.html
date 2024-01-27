@@ -122,23 +122,26 @@
 
     document.getElementById("stop").onclick = async () => {
       playing = false;
-
-      var playButton = document.getElementById("play");
-      playButton.classList.add('gray-button');
-
-      var pauseButton = document.getElementById("stop");
-      this.classList.remove('gray-button');
+      change_style(false);
     }
-    
-    document.getElementById("play").onclick = async () => {
 
+    function change_style(play_style) {
       var playButton = document.getElementById("play");
-      playButton.classList.remove('gray-button');
-
       var pauseButton = document.getElementById("stop");
-      pauseButton.classList.add('gray-button');
+      
+      if (play_style) {
+        playButton.classList.add('gray-button');
+        pauseButton.classList.remove('gray-button');
+      } else {
+        pauseButton.classList.add('gray-button');
+        playButton.classList.remove('gray-button');
+      }
+    }
 
+    document.getElementById("play").onclick = async () => {
       playing = true;
+      change_style(true);
+
       audio.resume(); // enable audio context after a user interaction
       // Request screen wake lock.  TODO: Apparently:
       //  - this will only work with https
