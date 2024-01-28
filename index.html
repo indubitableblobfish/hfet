@@ -110,6 +110,7 @@
     }
     
     document.getElementById("play").onclick = async () => {
+      if (playing) return;
       playing = true;
       audio.resume(); // enable audio context after a user interaction
       // Request screen wake lock.  TODO: Apparently:
