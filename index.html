@@ -1,4 +1,22 @@
 <!DOCTYPE html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E.T. :)</title>
+  <style>
+      button {
+          padding: 10px 20px;
+          background-color: darkblue;
+          color: #fff;
+          border: none;
+          cursor: pointer;
+      }
+
+      .gray-button {
+          background-color: #ccc;
+      }
+  </style>
+</head>
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -107,10 +125,26 @@
 
     document.getElementById("stop").onclick = async () => {
       playing = false;
+      change_style(false);
     }
-    
+
+    function change_style(play_style) {
+      var playButton = document.getElementById("play");
+      var pauseButton = document.getElementById("stop");
+      
+      if (play_style) {
+        playButton.classList.add('gray-button');
+        pauseButton.classList.remove('gray-button');
+      } else {
+        pauseButton.classList.add('gray-button');
+        playButton.classList.remove('gray-button');
+      }
+    }
+
     document.getElementById("play").onclick = async () => {
       playing = true;
+      change_style(true);
+
       audio.resume(); // enable audio context after a user interaction
       // Request screen wake lock.  TODO: Apparently:
       //  - this will only work with https
