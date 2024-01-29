@@ -13,15 +13,18 @@
     <button id="play">play</button>
     <button id="stop">stop</button>
     <select name="mode" id="mode">
-      <optgroup label="Intervals">
-        <option value="intervals:*">All</option>
+      <optgroup label="Harmonic Intervals">
+        <option value="harmonic:*">All Harmonic Intervals</option>
       </optgroup>
-      <optgroup label="Chord qualities">
-        <option value="chords:*">All</option>
+      <optgroup label="Melodic Intervals">
+        <option value="melodic:*">All Melodic Intervals</option>
+      </optgroup>
+      <optgroup label="Chord Qualities">
+        <option value="chords:*">All Chord Qualities</option>
       </optgroup>
       <optgroup label="Solfege">
-        <option value="solfege:do,re,mi,fa,sol,la,ti">Diatonic</option>
-        <option value="solfege:*">Chromatic</option>
+        <option value="solfege:do,re,mi,fa,sol,la,ti">Diatonic Solfege</option>
+        <option value="solfege:*">Chromatic Solfege</option>
       </optgroup>
     </select>
     <input type="checkbox" id="inversions">Use inversions</input>
@@ -164,7 +167,14 @@
       await sleep(duration*1000);
     }
 
-    async function singleQuiz(piano, key, notes, spokenName) {
+    async function intervalQuiz(piano, key, notes, harmonic, spokenName) {
+      await harmonic ?
+          playChord(piano, key, notes, 5) :
+	  playArpeggio(piano, key, notes, notes.length*1);
+      await speak(spokenName);
+    }
+
+    async function chordQuiz(piano, key, notes, spokenName) {
       await playChord(piano, key, notes, 1);
       await playArpeggio(piano, key, notes, notes.length * 0.5)
       await playChord(piano, key, notes, 3);
@@ -201,18 +211,23 @@
       } catch (err) {
         console.log(`${err.name}, ${err.message}`);
       }
+      const useInversions = document.getElementById("inversions").checked;
 
-      while (playing) {
+      let items = chords;
+      let itemQuiz = async (chord) => {
         // 48 is the C below middle C, 59 is the B below middle C. We'll stay with the 
 	// key note in this octave.
         const key = randomInt(48,59);
-        const chord = chords[randomInt(0, chords.length-1)];
-        const useInversions = document.getElementById("inversions").checked
         const inversion = useInversions ? randomInt(0, chord.notes.length-1) : 0;
         let notes = invertChord(chord.notes, inversion);
 
         console.log(`Playing ${noteName(key)}${chord.name}, inversion ${inversion}: ${notes.map(x => x+key).sort().map(noteName)}`);
-        await singleQuiz(piano, key, notes, chord.spokenName);
+        await chordQuiz(piano, key, notes, chord.spokenName);
+      };
+
+      while (playing) {
+        const item = items[randomInt(0, items.length-1)];
+	await itemQuiz(item);
         await sleep(1000);
       }
     };
