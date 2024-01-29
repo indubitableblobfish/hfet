@@ -2,56 +2,136 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body {
+	background-color: #000;
+	color: #aaa;
+      }
+    </style>
   </head>
   <body>
     <button id="play">play</button>
     <button id="stop">stop</button>
+    <select name="mode" id="mode">
+      <optgroup label="Intervals">
+        <option value="intervals:*">All</option>
+      </optgroup>
+      <optgroup label="Chord qualities">
+        <option value="chords:*">All</option>
+      </optgroup>
+      <optgroup label="Solfege">
+        <option value="solfege:do,re,mi,fa,sol,la,ti">Diatonic</option>
+        <option value="solfege:*">Chromatic</option>
+      </optgroup>
+    </select>
     <input type="checkbox" id="inversions">Use inversions</input>
   </body>
   <script type="module">
     import { SplendidGrandPiano } from "https://unpkg.com/smplr/dist/index.mjs"; // needs to be a url
     const audio = new AudioContext(); // create the audio context
     const piano = new SplendidGrandPiano(audio); // create and load the instrument
+    const intervals = [
+      {
+        name: "m2",
+	notes: [0, 1],
+	spokenName: "Minor 2nd",
+      },
+      {
+        name: "M2",
+	notes: [0, 2],
+	spokenName: "Major 2nd",
+      },
+      {
+        name: "m3",
+	notes: [0, 3],
+	spokenName: "Minor 3rd",
+      },
+      {
+        name: "M3",
+	notes: [0, 4],
+	spokenName: "Major 3rd",
+      },
+      {
+        name: "P4",
+	notes: [0, 5],
+	spokenName: "Perfect 4th",
+      },
+      {
+        name: "TT",
+	notes: [0, 6],
+	spokenName: "Tritone",
+      },
+      {
+        name: "P5",
+	notes: [0, 7],
+	spokenName: "Perfect 5th",
+      },
+      {
+        name: "m6",
+	notes: [0, 8],
+	spokenName: "Minor 6th",
+      },
+      {
+        name: "M6",
+	notes: [0, 9],
+	spokenName: "Major 6th",
+      },
+      {
+        name: "m7",
+	notes: [0, 10],
+	spokenName: "Minor 7th",
+      },
+      {
+        name: "M7",
+	notes: [0, 11],
+	spokenName: "Major 7th",
+      },
+      {
+        name: "O",
+	notes: [0, 12],
+	spokenName: "Octave",
+      },
+    ];
     const chords = [
       {
         name: "",
         notes: [0, 4, 7],
-        spokenName: "Major"
-      },
-      {
-        name: "+",
-        notes: [0, 4, 8],
-        spokenName: "Augmented"
+        spokenName: "Major",
       },
       {
         name: "m",
         notes: [0, 3, 7],
-        spokenName: "Minor"
+        spokenName: "Minor",
       },
       {
         name: "dim",
         notes: [0, 3, 6],
-        spokenName: "Diminished"
+        spokenName: "Diminished",
+      },
+      {
+        name: "+",
+        notes: [0, 4, 8],
+	spokenName: "Augmented",
       },
       {
         name: "7",
         notes: [0, 4, 7, 10],
-        spokenName: "Dominant 7th"
+        spokenName: "Dominant 7th",
       },
       {
         name: "m7",
         notes: [0, 3, 7, 10],
-        spokenName: "Minor 7th"
+        spokenName: "Minor 7th",
       },
            {
         name: "M7",
         notes: [0, 4, 7, 11],
-        spokenName: "Major 7th"
+        spokenName: "Major 7th",
       },
       {
         name: "mM7",
         notes: [0, 3, 7, 11],
-        spokenName: "Minor major 7th"
+        spokenName: "Minor major 7th",
       },
     ];
 
