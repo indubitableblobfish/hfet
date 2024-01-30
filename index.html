@@ -169,6 +169,13 @@
       return new Promise(r => setTimeout(r, duration))
     }
 
+    async function playInterval(piano, key, notes) {
+      const now = audio.currentTime;
+      piano.start({ note: key + notes[0], time: now, duration: 0.3 });
+      piano.start({ note: key + notes[1], time: now + 0.3, duration: 4.7 });
+      await sleep(5000);
+    }
+
     async function playArpeggio(piano, key, notes, duration) {
       const now = audio.currentTime;
       const increment = duration / notes.length;
@@ -195,7 +202,7 @@
       if (harmonic) {
         await playChord(piano, key, notes, 5);
       } else {
-        playArpeggio(piano, key, notes, notes.length*2.5);
+        await playInterval(piano, key, notes);
       }
       await speak(interval.spokenName);
     }
