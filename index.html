@@ -13,11 +13,29 @@
     <button id="play">play</button>
     <button id="stop">stop</button>
     <select name="mode" id="mode">
-      <optgroup label="Harmonic Intervals">
-        <option value="harmonic:*">All Harmonic Intervals</option>
-      </optgroup>
       <optgroup label="Melodic Intervals">
-        <option value="melodic:*">All Melodic Intervals</option>
+        <option value="melodic:M2,M3">              1: Major 2nds and 3rds</option>
+        <option value="melodic:p4,p5">              2: Perfect 4ths and 5ths</option>
+        <option value="melodic:M2,M3,p4,p5">        3: Major 2nds and 3rds, perfect 4ths and 5ths</option>
+        <option value="melodic:M6,M7,o">            4: Major 6ths, major 7ths, and octaves</option>
+        <option value="melodic:M2,M3,p4,p5,M6,M7,o">5: All major and perfect intervals</option>
+        <option value="melodic:m2,m3">              6: Minor 2nds and 3rds</option>
+        <option value="melodic:m2,m3,M2,M3">        7: All 2nds and 3rds</option>
+        <option value="melodic:tt,m6,m7">           8: Minor 6ths, 7ths, and tritones</option>
+        <option value="melodic:tt,m6,m7,M6,M7">     9: All 6ths, 7ths, and tritones</option>
+        <option value="melodic:*">                  10: All melodic intervals</option>
+      </optgroup>
+      <optgroup label="Harmonic Intervals">
+        <option value="harmonic:M2,M3">              1: Major 2nds and 3rds</option>
+        <option value="harmonic:p4,p5">              2: Perfect 4ths and 5ths</option>
+        <option value="harmonic:M2,M3,p4,p5">        3: Major 2nds and 3rds, perfect 4ths and 5ths</option>
+        <option value="harmonic:M6,M7,o">            4: Major 6ths, major 7ths, and octaves</option>
+        <option value="harmonic:M2,M3,p4,p5,M6,M7,o">5: All major and perfect intervals</option>
+        <option value="harmonic:m2,m3">              6: Minor 2nds and 3rds</option>
+        <option value="harmonic:m2,m3,M2,M3">        7: All 2nds and 3rds</option>
+        <option value="harmonic:tt,m6,m7">           8: Minor 6ths, 7ths, and tritones</option>
+        <option value="harmonic:tt,m6,m7,M6,M7">     9: All 6ths, 7ths, and tritones</option>
+        <option value="harmonic:*">                  10: All harmonic intervals</option>
       </optgroup>
       <optgroup label="Chord Qualities">
         <option value="chords:*" selected>All Chord Qualities</option>
@@ -60,12 +78,12 @@
         spokenName: "Perfect 4th",
       },
       {
-        name: "TT",
+        name: "tt",
         notes: [0, 6],
         spokenName: "Try tone",
       },
       {
-        name: "P5",
+        name: "p5",
         notes: [0, 7],
         spokenName: "Perfect 5th",
       },
@@ -90,7 +108,7 @@
         spokenName: "Major 7th",
       },
       {
-        name: "O",
+        name: "o",
         notes: [0, 12],
         spokenName: "Octave",
       },
