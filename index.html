@@ -4,8 +4,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       body {
-	background-color: #000;
-	color: #aaa;
+        background-color: #000;
+        color: #aaa;
       }
     </style>
   </head>
@@ -36,63 +36,63 @@
     const intervals = [
       {
         name: "m2",
-	notes: [0, 1],
-	spokenName: "Minor 2nd",
+        notes: [0, 1],
+        spokenName: "Minor 2nd",
       },
       {
         name: "M2",
-	notes: [0, 2],
-	spokenName: "Major 2nd",
+        notes: [0, 2],
+        spokenName: "Major 2nd",
       },
       {
         name: "m3",
-	notes: [0, 3],
-	spokenName: "Minor 3rd",
+        notes: [0, 3],
+        spokenName: "Minor 3rd",
       },
       {
         name: "M3",
-	notes: [0, 4],
-	spokenName: "Major 3rd",
+        notes: [0, 4],
+        spokenName: "Major 3rd",
       },
       {
         name: "P4",
-	notes: [0, 5],
-	spokenName: "Perfect 4th",
+        notes: [0, 5],
+        spokenName: "Perfect 4th",
       },
       {
         name: "TT",
-	notes: [0, 6],
-	spokenName: "Tritone",
+        notes: [0, 6],
+        spokenName: "Try tone",
       },
       {
         name: "P5",
-	notes: [0, 7],
-	spokenName: "Perfect 5th",
+        notes: [0, 7],
+        spokenName: "Perfect 5th",
       },
       {
         name: "m6",
-	notes: [0, 8],
-	spokenName: "Minor 6th",
+        notes: [0, 8],
+        spokenName: "Minor 6th",
       },
       {
         name: "M6",
-	notes: [0, 9],
-	spokenName: "Major 6th",
+        notes: [0, 9],
+        spokenName: "Major 6th",
       },
       {
         name: "m7",
-	notes: [0, 10],
-	spokenName: "Minor 7th",
+        notes: [0, 10],
+        spokenName: "Minor 7th",
       },
       {
         name: "M7",
-	notes: [0, 11],
-	spokenName: "Major 7th",
+        notes: [0, 11],
+        spokenName: "Major 7th",
       },
       {
         name: "O",
-	notes: [0, 12],
-	spokenName: "Octave",
+        notes: [0, 12],
+        spokenName: "Octave",
       },
     ];
     const chords = [
@@ -114,7 +114,7 @@
       {
         name: "+",
         notes: [0, 4, 8],
-	spokenName: "Augmented",
+        spokenName: "Augmented",
       },
       {
         name: "7",
@@ -167,18 +167,30 @@
       await sleep(duration*1000);
     }
 
-    async function intervalQuiz(piano, key, notes, harmonic, spokenName) {
-      await harmonic ?
-          playChord(piano, key, notes, 5) :
-	  playArpeggio(piano, key, notes, notes.length*1);
-      await speak(spokenName);
+    async function intervalQuiz(piano, key, interval, harmonic) {
+      let notes = [...interval.notes];
+      const ascending = randomInt(0,1);
+      if (!ascending) {
+        notes.reverse();
+      }
+      console.log(`Playing interval ${interval.name}, ${ascending ? 'ascending' : 'descending'}: ${notes.map(x => x+key).map(noteName)}`);
+      if (harmonic) {
+        await playChord(piano, key, notes, 5);
+      } else {
+        playArpeggio(piano, key, notes, notes.length*2.5);
+      }
+      await speak(interval.spokenName);
     }
 
-    async function chordQuiz(piano, key, notes, spokenName) {
+    async function chordQuiz(piano, key, chord, useInversions) {
+      const inversion = useInversions ? randomInt(0, chord.notes.length-1) : 0;
+      let notes = invertChord(chord.notes, inversion);
+
+      console.log(`Playing ${noteName(key)}${chord.name}, inversion ${inversion}: ${notes.map(x => x+key).map(noteName)}`);
       await playChord(piano, key, notes, 1);
       await playArpeggio(piano, key, notes, notes.length * 0.5)
       await playChord(piano, key, notes, 3);
-      await speak(spokenName)
+      await speak(chord.spokenName)
     }
     
     // returns a random integer in [floor, ceiling]
@@ -186,11 +198,47 @@
       if (ceiling < floor) return nan;
       return floor + Math.floor(Math.random() * (ceiling - floor + 1))
     }
+    function randomKey() {
+        // 48 is the C below middle C, 59 is the B below middle C. We'll stay with the 
+        // key note in this octave.
+        return randomInt(48,59);
+    }
 
     function noteName(note) {
       const noteNames = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
       const index = note % 12;
       return noteNames[index];
+    }
+
+    const modeToItems = {
+        'chords': chords,
+        'harmonic': intervals,
+        'melodic': intervals,
+    };
+
+    function makeQuizzer(mode, useInversions) {
+      const splitMode = mode.split(":");
+      const modeName = splitMode[0];
+      const itemNames = new Set(splitMode[1].split(","));
+      let quizFn;
+      switch (splitMode[0]) {
+        case 'harmonic':
+          quizFn = async (piano, key, item) => { await intervalQuiz(piano, key, item, true); };
+          break;
+        case 'melodic':
+          quizFn = async (piano, key, item) => { await intervalQuiz(piano, key, item, false); };
+          break;
+        case 'chords':
+        default:
+          quizFn = async (piano, key, item) => { await chordQuiz(piano, key, item, useInversions); };
+          break;
+      }
+
+      let items = [...modeToItems[modeName]];
+      if (!itemNames.has('*')) {
+        items = items.filter((item) => itemNames.has(item.name));
+      }
+      return { items: items, quizFn: quizFn };
     }
 
     let playing = false;
@@ -213,21 +261,11 @@
       }
       const useInversions = document.getElementById("inversions").checked;
 
-      let items = chords;
-      let itemQuiz = async (chord) => {
-        // 48 is the C below middle C, 59 is the B below middle C. We'll stay with the 
-	// key note in this octave.
-        const key = randomInt(48,59);
-        const inversion = useInversions ? randomInt(0, chord.notes.length-1) : 0;
-        let notes = invertChord(chord.notes, inversion);
-
-        console.log(`Playing ${noteName(key)}${chord.name}, inversion ${inversion}: ${notes.map(x => x+key).sort().map(noteName)}`);
-        await chordQuiz(piano, key, notes, chord.spokenName);
-      };
+      let quizzer = makeQuizzer(document.getElementById("mode").value);
 
       while (playing) {
-        const item = items[randomInt(0, items.length-1)];
-	await itemQuiz(item);
+        const item = quizzer.items[randomInt(0, quizzer.items.length-1)];
+        await quizzer.quizFn(piano, randomKey(), item);
         await sleep(1000);
       }
     };
@@ -235,7 +273,7 @@
     function invertChord(notes, inversion) {
       let inverted = []
       for (let i = inversion; i < inversion + notes.length; ++i) {
-	inverted.push(notes[i % notes.length] + 12 * Math.floor(i / notes.length));
+        inverted.push(notes[i % notes.length] + 12 * Math.floor(i / notes.length));
       }
       return inverted;
     }
