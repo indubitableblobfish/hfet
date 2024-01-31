@@ -23,7 +23,7 @@ const intervals = [
     spokenName: "Major 3rd",
   },
   {
-    name: "P4",
+    name: "p4",
     notes: [0, 5],
     spokenName: "Perfect 4th",
   },
