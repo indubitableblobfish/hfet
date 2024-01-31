@@ -1,6 +1,6 @@
-import { SplendidGrandPiano } from "https://unpkg.com/smplr/dist/index.mjs"; // needs to be a url
-const audio = new AudioContext(); // create the audio context
-const piano = new SplendidGrandPiano(audio); // create and load the instrument
+import { SplendidGrandPiano } from "./smplr/dist/index.mjs";
+const audio = new AudioContext();
+const piano = new SplendidGrandPiano(audio);
 const intervals = [
   {
     name: "m2",
